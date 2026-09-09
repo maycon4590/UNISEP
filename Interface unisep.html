@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPJ Fácil — UNISEP</title>
+<style>
+  :root{
+    --blue:#062b5c;
+    --blue2:#0b3f7d;
+    --red:#e4003b;
+    --green:#18a566;
+    --yellow:#f4ad17;
+    --bg:#f4f7fb;
+    --card:#ffffff;
+    --text:#18324f;
+    --muted:#718096;
+    --border:#e5eaf1;
+    --shadow:0 8px 25px rgba(6,43,92,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  button,input,select{font:inherit}
+  button{cursor:pointer}
+  .app{display:flex;min-height:100vh}
+
+  /* SIDEBAR */
+  .sidebar{
+    width:250px;background:var(--blue);color:white;padding:22px 16px;
+    position:fixed;inset:0 auto 0 0;z-index:20;display:flex;flex-direction:column;
+  }
+  .brand{display:flex;align-items:center;gap:12px;padding:6px 10px 28px}
+  .brand-mark{
+    width:43px;height:43px;border-radius:12px;background:white;
+    display:grid;place-items:center;color:var(--red);font-size:25px;font-weight:900;
+  }
+  .brand strong{font-size:24px;letter-spacing:-1px}
+  .brand small{display:block;color:#c9d7e8;font-size:11px;margin-top:2px}
+  .nav{display:flex;flex-direction:column;gap:6px}
+  .nav button{
+    border:0;background:transparent;color:#dce8f5;text-align:left;
+    padding:13px 14px;border-radius:10px;display:flex;align-items:center;gap:12px;
+    transition:.2s;
+  }
+  .nav button:hover,.nav button.active{background:#0d467f;color:white}
+  .nav .icon{width:23px;text-align:center}
+  .sidebar-footer{margin-top:auto;border-top:1px solid rgba(255,255,255,.13);padding:16px 8px 0}
+  .user-mini{display:flex;align-items:center;gap:10px}
+  .avatar{width:38px;height:38px;border-radius:50%;background:#e9eef5;color:var(--blue);display:grid;place-items:center;font-weight:800}
+  .user-mini strong{font-size:13px}.user-mini span{font-size:11px;color:#c7d7e8}
+
+  /* MAIN */
+  main{margin-left:250px;width:calc(100% - 250px)}
+  header{
+    height:76px;background:white;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;padding:0 34px;
+    position:sticky;top:0;z-index:10;
+  }
+  .header-title h1{font-size:22px;margin:0}.header-title p{margin:4px 0 0;color:var(--muted);font-size:13px}
+  .header-actions{display:flex;align-items:center;gap:12px}
+  .search{position:relative}
+  .search input{width:230px;border:1px solid var(--border);border-radius:9px;padding:10px 12px 10px 36px;outline:none}
+  .search span{position:absolute;left:12px;top:9px}
+  .notification{
+    width:40px;height:40px;border:1px solid var(--border);background:white;border-radius:9px;position:relative
+  }
+  .notification b{position:absolute;right:-3px;top:-4px;background:var(--red);color:white;border-radius:20px;font-size:10px;padding:3px 6px}
+
+  .content{padding:28px 34px 40px}
+  .topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .topline h2{margin:0;font-size:18px}.date{color:var(--muted);font-size:13px}
+  .btn-primary{border:0;background:var(--red);color:white;padding:11px 16px;border-radius:9px;font-weight:700;box-shadow:0 5px 12px rgba(228,0,59,.2)}
+  .btn-secondary{border:1px solid var(--border);background:white;color:var(--blue);padding:10px 14px;border-radius:9px;font-weight:600}
+
+  /* METRICS */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .metric{
+    background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px;
+    box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:flex-start;
+  }
+  .metric p{margin:0;color:var(--muted);font-size:12px;font-weight:600}
+  .metric h3{font-size:30px;margin:7px 0 0;color:var(--blue)}
+  .metric small{font-size:11px;color:var(--muted)}
+  .metric .micon{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:20px}
+  .red{background:#ffe8ee;color:var(--red)}.yellow{background:#fff4d9;color:#b87800}
+  .green{background:#e5f8ef;color:#08794b}.blue{background:#e6f0fb;color:var(--blue2)}
+
+  /* GRID */
+  .grid{display:grid;grid-template-columns:1.35fr .9fr;gap:20px}
+  .card{background:white;border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadow);overflow:hidden}
+  .card-head{display:flex;justify-content:space-between;align-items:center;padding:17px 19px;border-bottom:1px solid var(--border)}
+  .card-head h3{margin:0;font-size:15px}.card-head a{font-size:12px;color:var(--blue2);font-weight:700;cursor:pointer}
+  .card-body{padding:0 19px 18px}
+
+  /* PENDENCIES */
+  .alert-row{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid #edf0f4}
+  .alert-row:last-child{border-bottom:0}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .dot.red{background:var(--red)}.dot.yellow{background:var(--yellow)}.dot.green{background:var(--green)}
+  .row-main{flex:1}.row-main strong{display:block;font-size:13px}.row-main span{font-size:11px;color:var(--muted)}
+  .tag{font-size:10px;font-weight:800;padding:5px 8px;border-radius:20px}
+  .tag.red{background:#ffe8ee;color:#b80030}.tag.yellow{background:#fff4d9;color:#9b6500}.tag.green{background:#e5f8ef;color:#08794b}
+
+  /* TABLE */
+  .table-wrap{overflow:auto}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:13px 19px;border-bottom:1px solid #edf0f4;font-size:12px;white-space:nowrap}
+  th{font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;background:#fafbfd}
+  td strong{font-size:12px}
+  .status{font-size:10px;font-weight:800;border-radius:15px;padding:5px 8px;background:#e5f8ef;color:#08794b}
+  .status.blue{background:#e6f0fb;color:var(--blue2)}
+  .status.yellow{background:#fff4d9;color:#9b6500}
+
+  /* RIGHT CARDS */
+  .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:18px}
+  .quick button{border:1px solid var(--border);background:#fff;border-radius:10px;padding:15px 10px;text-align:left;color:var(--blue)}
+  .quick button:hover{border-color:#aac0dc;background:#f8fbff}
+  .quick b{display:block;font-size:12px;margin-top:7px}.quick span{font-size:19px}
+  .timeline{padding:5px 19px 20px}
+  .event{display:flex;gap:12px;position:relative;padding:12px 0}
+  .event:not(:last-child):before{content:"";position:absolute;left:7px;top:26px;width:1px;height:35px;background:#dbe3ed}
+  .event-dot{width:15px;height:15px;border-radius:50%;background:var(--green);border:3px solid #d8f3e7;margin-top:2px;z-index:1}
+  .event strong{font-size:12px}.event p{margin:3px 0 0;font-size:11px;color:var(--muted)}
+
+  /* MODAL */
+  .modal{display:none;position:fixed;inset:0;background:rgba(4,23,46,.5);z-index:50;align-items:center;justify-content:center;padding:20px}
+  .modal.open{display:flex}
+  .modal-box{width:min(620px,100%);background:white;border-radius:15px;box-shadow:0 25px 70px rgba(0,0,0,.25)}
+  .modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+  .modal-head h3{margin:0;font-size:17px}
+  .close{border:0;background:transparent;font-size:22px;color:var(--muted)}
+  .modal-body{padding:20px}
+  .field{margin-bottom:15px}.field label{display:block;font-size:11px;font-weight:800;margin-bottom:6px;color:var(--blue)}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;outline:none}
+  .field textarea{min-height:100px;resize:vertical}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+  .empty{padding:35px;text-align:center;color:var(--muted);display:none}
+  .mobile-menu{display:none}
+
+  @media(max-width:1050px){
+    .metrics{grid-template-columns:repeat(2,1fr)}
+    .grid{grid-template-columns:1fr}
+  }
+  @media(max-width:760px){
+    .sidebar{transform:translateX(-100%);transition:.25s}
+    .sidebar.open{transform:translateX(0)}
+    main{margin-left:0;width:100%}
+    header{padding:0 16px}.content{padding:20px 16px}
+    .mobile-menu{display:block;border:0;background:transparent;font-size:22px;margin-right:8px}
+    .header-title{display:flex;align-items:center}
+    .search{display:none}
+    .metrics{grid-template-columns:1fr 1fr;gap:10px}
+    .metric{padding:14px}.metric h3{font-size:25px}.metric .micon{width:36px;height:36px;font-size:16px}
+  }
+  @media(max-width:480px){
+    .metrics{grid-template-columns:1fr}
+    .topline{align-items:flex-start;gap:10px;flex-direction:column}
+    .quick{grid-template-columns:1fr 1fr}
+  }
+
+  .hidden{display:none!important}
+  .view{animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+  .pagebar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}
+  .pagebar h2{margin:0;font-size:20px}.pagebar p{margin:5px 0 0;color:var(--muted);font-size:13px}
+  .stats-line{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .mini-stat{background:#fff;border:1px solid var(--border);border-radius:11px;min-width:145px;padding:14px 18px;box-shadow:var(--shadow)}
+  .mini-stat b{display:block;color:var(--blue);font-size:24px}.mini-stat span{color:var(--muted);font-size:11px}
+  .mini-stat.critical b{color:var(--red)}.mini-stat.warning b{color:#ad7200}.mini-stat.good b{color:var(--green)}
+  .list{padding:0 19px 10px}
+  .list-row{display:flex;align-items:center;gap:14px;padding:15px 4px;border-bottom:1px solid #edf0f4}
+  .list-row:last-child{border-bottom:0}
+  .list-icon{width:38px;height:38px;border-radius:10px;background:#eef4fb;display:grid;place-items:center;flex:none}
+  .list-main{flex:1}.list-main strong{font-size:13px;display:block}.list-main span{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+  .row-actions{display:flex;gap:7px;align-items:center}.row-btn{border:1px solid var(--border);background:white;color:var(--blue2);border-radius:8px;padding:7px 10px;font-size:10px;font-weight:800}
+  .row-btn:hover{background:#f5f9ff}
+  .filters{display:flex;gap:6px}.filter{border:1px solid var(--border);background:#fff;border-radius:16px;padding:6px 9px;font-size:10px}.filter.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .toolbar{display:flex;gap:10px;margin-bottom:15px}.toolbar input,.toolbar select,.small-search{border:1px solid var(--border);background:#fff;padding:11px 12px;border-radius:9px;outline:none}.toolbar input{flex:1}.toolbar select{width:180px}.small-search{width:210px;padding:8px}
+  .message-layout{display:grid;grid-template-columns:300px 1fr;gap:18px}.conversation-list{padding:5px}
+  .conversation{padding:13px 14px;border-radius:9px;display:flex;gap:10px;cursor:pointer}.conversation:hover,.conversation.active{background:#f1f6fc}
+  .conversation .avatar{width:35px;height:35px;font-size:11px}.conversation strong{font-size:12px}.conversation p{font-size:10px;color:var(--muted);margin:4px 0}
+  .message-panel{min-height:520px;display:flex;flex-direction:column}.chat{flex:1;padding:20px;display:flex;flex-direction:column;gap:10px;background:#fafbfd}
+  .bubble{max-width:78%;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.4}.bubble.in{background:white;border:1px solid var(--border);align-self:flex-start}.bubble.out{background:#e6f0fb;color:var(--blue);align-self:flex-end}
+  .bubble small{display:block;font-size:9px;opacity:.6;margin-top:4px}
+  .chat-compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}.chat-compose input{flex:1;border:1px solid var(--border);border-radius:9px;padding:11px}
+  .report-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.report-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow)}.report-card span{font-size:11px;color:var(--muted)}.report-card b{display:block;font-size:30px;color:var(--blue);margin:8px 0}.report-card small{font-size:10px;color:var(--green)}
+  .report-bars{padding-bottom:20px}.bar-item{display:grid;grid-template-columns:100px 1fr 50px;align-items:center;gap:12px;margin:18px 20px;font-size:11px}.bar-item>div{height:9px;background:#edf1f5;border-radius:10px;overflow:hidden}.bar-item i{display:block;height:100%;background:var(--blue2);border-radius:10px}.bar-item b{text-align:right}
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.settings-card{padding:20px}.settings-card h3{margin:0 0 18px;font-size:15px}.settings-card label{display:block;font-size:11px;font-weight:800;color:var(--blue);margin-bottom:14px}.settings-card input,.settings-card textarea{display:block;width:100%;margin-top:6px;border:1px solid var(--border);border-radius:8px;padding:10px;font-weight:400;color:var(--text)}.settings-card textarea{min-height:90px;resize:vertical}
+  .switch-row{display:flex!important;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #edf0f4;font-weight:600!important}.switch-row input{display:none!important}.fake-switch{margin-left:auto;width:39px;height:21px;border-radius:20px;background:#cad3df;position:relative}.switch-row input:checked + .fake-switch{background:var(--green)}.fake-switch:after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.2s}.switch-row input:checked + .fake-switch:after{left:21px}
+  .toast{position:fixed;right:24px;bottom:24px;background:var(--blue);color:#fff;padding:12px 16px;border-radius:9px;box-shadow:0 12px 30px rgba(6,43,92,.24);z-index:100;font-size:12px}
+  @media(max-width:900px){.report-grid{grid-template-columns:repeat(2,1fr)}.message-layout,.settings-grid{grid-template-columns:1fr}}
+  @media(max-width:700px){.pagebar{align-items:flex-start;flex-direction:column}.toolbar{flex-direction:column}.toolbar select{width:100%}.small-search{width:160px}.report-grid{grid-template-columns:1fr 1fr}.message-layout{grid-template-columns:1fr}.message-panel{min-height:460px}}
+
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#062b5c,#0b3f7d);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{width:min(430px,100%);background:#fff;border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.25);padding:34px}
+.login-brand{text-align:center;margin-bottom:24px}.login-logo{width:58px;height:58px;border-radius:15px;background:#062b5c;color:#e4003b;display:grid;place-items:center;font-size:34px;font-weight:900;margin:0 auto 10px}.login-brand h2{margin:0;color:#062b5c;font-size:24px}.login-brand p{margin:5px 0 0;color:#718096;font-size:12px}.login-field{margin:14px 0}.login-field label{display:block;font-size:11px;font-weight:800;color:#062b5c;margin-bottom:6px}.login-field input{width:100%;padding:12px;border:1px solid #dfe5ed;border-radius:9px;outline:none}.login-btn{width:100%;border:0;background:#e4003b;color:#fff;padding:12px;border-radius:9px;font-weight:800;margin-top:8px}.login-help{text-align:center;color:#718096;font-size:10px;margin-top:14px}.login-error{background:#ffe8ee;color:#b80030;padding:10px;border-radius:8px;font-size:11px;margin-bottom:12px;display:none}.demo-accounts{margin-top:18px;padding-top:14px;border-top:1px solid #eef1f5;font-size:10px;color:#718096;line-height:1.6}.demo-accounts b{color:#062b5c}
+.user-menu{position:relative}.user-button{border:0;background:transparent;display:flex;align-items:center;gap:8px}.user-button span{font-size:11px;color:var(--muted);display:block;text-align:left}.user-button strong{font-size:12px;color:var(--blue)}.user-dropdown{display:none;position:absolute;right:0;top:48px;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);width:210px;padding:8px;z-index:40}.user-dropdown.open{display:block}.user-dropdown button{width:100%;text-align:left;border:0;background:white;border-radius:7px;padding:9px;font-size:11px;color:var(--text)}.user-dropdown button:hover{background:#f4f7fb}.permission-note{font-size:11px;color:var(--muted);margin-top:4px}
+.admin-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}.role-badge{font-size:10px;padding:5px 8px;border-radius:20px;background:#e6f0fb;color:#0b3f7d;font-weight:800}.role-badge.admin{background:#ffe8ee;color:#b80030}.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.perm-check{display:flex;gap:7px;align-items:center;font-size:11px;border:1px solid #edf0f4;padding:8px;border-radius:8px}.admin-form{padding:18px}.admin-form label{display:block;font-size:10px;font-weight:800;color:var(--blue);margin:10px 0}.admin-form input,.admin-form select{display:block;width:100%;padding:10px;border:1px solid var(--border);border-radius:8px}.admin-form button{margin-top:10px}.user-row-actions{display:flex;gap:6px}
+@media(max-width:900px){.admin-grid{grid-template-columns:1fr}}
+  .small-select{border:1px solid var(--border);background:#fff;border-radius:9px;padding:8px 10px;font-size:11px;color:var(--text)}
+  .admin-perm-info{padding:5px 18px 18px}.admin-perm-info>div{padding:13px 0;border-bottom:1px solid #edf0f4}.admin-perm-info>div:last-child{border-bottom:0}.admin-perm-info b{display:block;font-size:12px;color:var(--blue)}.admin-perm-info span{font-size:10px;color:var(--muted)}
+  .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.perm-check{display:flex;align-items:center;gap:7px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600!important;color:var(--text)!important}.perm-check input{width:auto!important;margin:0!important}
+  .activity-mini{padding:5px 18px 12px}.activity-item{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid #edf0f4}.activity-item:last-child{border-bottom:0}.act-icon{width:30px;height:30px;border-radius:8px;background:#eef4fb;display:grid;place-items:center;flex:none}.activity-item b{display:block;font-size:11px}.activity-item span{font-size:10px;color:var(--muted)}
+  @media(max-width:800px){.admin-grid{grid-template-columns:1fr!important}.card-head>div{flex-wrap:wrap}.small-select,.small-search{width:100%!important}}
+
+  .admin-quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.admin-quick-actions button{border:1px solid var(--border);background:#fff;border-radius:9px;padding:9px 12px;font-size:10px;color:var(--blue);font-weight:800}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand"><div class="login-logo">U</div><h2>NPJ Fácil</h2><p>Núcleo de Práticas Jurídicas — UNISEP</p></div>
+    <div class="login-error" id="loginError">Usuário ou senha incorretos.</div>
+    <div class="login-field"><label>USUÁRIO OU E-MAIL</label><input id="loginUser" autocomplete="username" placeholder="Digite seu usuário"></div>
+    <div class="login-field"><label>SENHA</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="Digite sua senha"></div>
+    <button class="login-btn" id="loginBtn">ENTRAR</button>
+    <div class="login-help">Acesso restrito à equipe autorizada do NPJ.</div>
+    <div class="demo-accounts"><b>Acessos de demonstração:</b><br>Administrador: <b>admin</b> / <b>1234</b><br>Professor: <b>professor</b> / <b>1234</b><br>Aluno: <b>aluno</b> / <b>1234</b></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">U</div>
+      <div><strong>Unisep</strong><small>Núcleo de Práticas Jurídicas</small></div>
+    </div>
+
+    <nav class="nav">
+      <button class="active" data-page="dashboard"><span class="icon">▦</span> Painel</button>
+      <button data-page="triagem"><span class="icon">👥</span> Triagem</button>
+      <button data-page="atendimentos"><span class="icon">📋</span> Atendimentos</button>
+      <button data-page="documentos"><span class="icon">📄</span> Documentos</button>
+      <button data-page="processos"><span class="icon">⚖</span> Processos</button>
+      <button data-page="mensagens"><span class="icon">💬</span> Mensagens</button>
+      <button data-page="prazos"><span class="icon">⏰</span> Prazos</button>
+      <button data-page="relatorios"><span class="icon">▥</span> Relatórios</button>
+      <button data-page="admin" id="adminNav"><span class="icon">👑</span> Administração</button><button data-page="config"><span class="icon">⚙</span> Configurações</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-mini">
+        <div class="avatar">MC</div>
+        <div><strong>Coordenador</strong><span>Equipe NPJ</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div class="header-title">
+        <button class="mobile-menu" id="mobileMenu">☰</button>
+        <div><h1 id="pageTitle">Painel do NPJ</h1><p id="pageSubtitle">Visão geral dos atendimentos e pendências</p></div>
+      </div>
+      <div class="header-actions">
+        <div class="search"><span>⌕</span><input id="searchInput" placeholder="Buscar assistido..."></div>
+        <button class="notification" id="openNotifications">🔔<b>5</b></button>
+        <div class="user-menu"><button class="user-button" id="userButton"><div class="avatar" id="headerAvatar">AD</div><div><strong id="headerUserName">Administrador</strong><span id="headerUserRole">Administrador</span></div>⌄</button><div class="user-dropdown" id="userDropdown"><button data-nav="perfil">👤 Meu perfil</button><button id="changePassword">🔑 Alterar senha</button><button id="logoutBtn">↪ Sair do sistema</button></div></div>
+      </div>
+    </header>
+
+    
+<section class="content">
+
+  <!-- DASHBOARD -->
+  <div class="view" id="view-dashboard">
+    <div class="topline">
+      <div><h2>Bom dia, equipe 👋</h2><div class="date">08 de setembro de 2026</div></div>
+      <button class="btn-primary" data-action="novo-atendimento">+ Novo atendimento</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div><p>ATENDIMENTOS HOJE</p><h3 id="kpiAtendimentos">23</h3><small>+8% nesta semana</small></div><div class="micon blue">👥</div></div>
+      <div class="metric"><div><p>AGUARDANDO TRIAGEM</p><h3 id="kpiTriagem">8</h3><small>3 aguardando há mais de 24h</small></div><div class="micon yellow">⏳</div></div>
+      <div class="metric"><div><p>DOCUMENTOS PENDENTES</p><h3 id="kpiDocs">12</h3><small>4 precisam de contato</small></div><div class="micon red">📄</div></div>
+      <div class="metric"><div><p>PRAZOS PRÓXIMOS</p><h3 id="kpiPrazos">5</h3><small>2 vencem amanhã</small></div><div class="micon green">⚠</div></div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div class="card-head"><h3>🚨 Pendências que precisam da sua atenção</h3><a data-nav="prazos">Ver todas</a></div>
+          <div class="card-body" id="attentionList"></div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><h3>⚖️ Processos em acompanhamento</h3><a data-nav="processos">Ver processos</a></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Assistido</th><th>Área</th><th>Última atualização</th><th>Status</th></tr></thead>
+              <tbody id="dashboardProcessTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-head"><h3>⚡ Acesso rápido</h3></div>
+          <div class="quick">
+            <button data-action="novo-atendimento"><span>👤</span><b>Novo assistido</b></button>
+            <button data-action="nova-mensagem"><span>💬</span><b>Enviar mensagem</b></button>
+            <button data-action="novo-documento"><span>📄</span><b>Adicionar documento</b></button>
+            <button data-action="novo-prazo"><span>⏰</span><b>Registrar prazo</b></button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><h3>🕒 Atividade recente</h3><a data-nav="relatorios">Ver histórico</a></div>
+          <div class="timeline" id="recentTimeline"></div>
+        </div>
+
+        <div class="card" style="margin-top:20px;padding:18px">
+          <div style="font-size:12px;font-weight:800;color:var(--blue)">💡 Inteligência do NPJ</div>
+          <p style="font-size:12px;line-height:1.55;color:var(--muted);margin:8px 0 0">
+            O sistema identificou <b style="color:var(--red)">2 casos</b> que precisam de contato com o assistido e <b style="color:var(--blue)">1 prazo</b> que exige revisão hoje.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRIAGEM -->
+  <div class="view hidden" id="view-triagem">
+    <div class="pagebar">
+      <div><h2>Triagem de novos atendimentos</h2><p>Organize os casos e conclua a entrevista inicial com linguagem simples.</p></div>
+      <button class="btn-primary" data-action="nova-triagem">+ Iniciar triagem</button>
+    </div>
+    <div class="stats-line">
+      <div class="mini-stat"><b id="triagemCount">8</b><span>Aguardando</span></div>
+      <div class="mini-stat"><b>3</b><span>Em análise</span></div>
+      <div class="mini-stat"><b>14</b><span>Concluídas hoje</span></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Fila de triagem</h3><div class="filters"><button class="filter active" data-filter="todos">Todos</button><button class="filter" data-filter="urgente">Urgentes</button><button class="filter" data-filter="hoje">Hoje</button></div></div>
+      <div id="triagemList" class="list"></div>
+    </div>
+  </div>
+
+  <!-- ATENDIMENTOS -->
+  <div class="view hidden" id="view-atendimentos">
+    <div class="pagebar">
+      <div><h2>Atendimentos</h2><p>Histórico de pessoas atendidas e responsáveis.</p></div>
+      <button class="btn-primary" data-action="novo-atendimento">+ Novo atendimento</button>
+    </div>
+    <div class="toolbar"><input id="assistidoSearch" placeholder="🔎  Buscar por nome, área ou responsável..."><select id="areaFilter"><option value="">Todas as áreas</option><option>Família</option><option>Consumidor</option><option>Cível</option><option>Trabalhista</option></select></div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Assistido</th><th>Área</th><th>Responsável</th><th>Status</th><th></th></tr></thead><tbody id="atendimentosTable"></tbody></table></div></div>
+  </div>
+
+  <!-- DOCUMENTOS -->
+  <div class="view hidden" id="view-documentos">
+    <div class="pagebar">
+      <div><h2>Documentos</h2><p>Controle de documentos recebidos, em análise e pendentes.</p></div>
+      <button class="btn-primary" data-action="novo-documento">+ Adicionar documento</button>
+    </div>
+    <div class="stats-line">
+      <div class="mini-stat"><b>37</b><span>Recebidos</span></div>
+      <div class="mini-stat"><b>9</b><span>Em análise</span></div>
+      <div class="mini-stat"><b>12</b><span>Pendentes</span></div>
+      <div class="mini-stat"><b>4</b><span>Recusados</span></div>
+    </div>
+    <div class="card"><div class="card-head"><h3>Documentos que exigem ação</h3></div><div id="documentList" class="list"></div></div>
+  </div>
+
+  <!-- PROCESSOS -->
+  <div class="view hidden" id="view-processos">
+    <div class="pagebar">
+      <div><h2>Processos</h2><p>Acompanhe cada caso, sua etapa atual e a próxima providência.</p></div>
+      <button class="btn-primary" data-action="novo-processo">+ Registrar processo</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Processos em acompanhamento</h3><input class="small-search" id="processSearch" placeholder="Buscar processo..."></div>
+      <div class="table-wrap"><table><thead><tr><th>Processo</th><th>Assistido</th><th>Área</th><th>Etapa atual</th><th>Próxima ação</th><th></th></tr></thead><tbody id="processosTable"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- MENSAGENS -->
+  <div class="view hidden" id="view-mensagens">
+    <div class="pagebar">
+      <div><h2>Mensagens</h2><p>Comunicação registrada e mensagens automáticas para os assistidos.</p></div>
+      <button class="btn-primary" data-action="nova-mensagem">+ Nova mensagem</button>
+    </div>
+    <div class="message-layout">
+      <div class="card">
+        <div class="card-head"><h3>Conversas recentes</h3></div>
+        <div id="conversationList" class="conversation-list"></div>
+      </div>
+      <div class="card message-panel">
+        <div class="card-head"><h3 id="conversationTitle">João da Silva</h3><span class="tag green">Ativo</span></div>
+        <div class="chat" id="chatBox"></div>
+        <div class="chat-compose"><input id="messageInput" placeholder="Digite uma mensagem simples..."><button class="btn-primary" id="sendMessage">Enviar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRAZOS -->
+  <div class="view hidden" id="view-prazos">
+    <div class="pagebar">
+      <div><h2>Prazos</h2><p>Controle de tarefas e prazos para não deixar nenhuma providência passar.</p></div>
+      <button class="btn-primary" data-action="novo-prazo">+ Registrar prazo</button>
+    </div>
+    <div class="stats-line"><div class="mini-stat critical"><b>2</b><span>Vencem amanhã</span></div><div class="mini-stat warning"><b>3</b><span>Próximos</span></div><div class="mini-stat good"><b>21</b><span>Dentro do prazo</span></div></div>
+    <div class="card"><div class="card-head"><h3>Agenda de prazos</h3></div><div id="deadlineList" class="list"></div></div>
+  </div>
+
+  <!-- RELATÓRIOS -->
+  <div class="view hidden" id="view-relatorios">
+    <div class="pagebar"><div><h2>Relatórios</h2><p>Indicadores do Núcleo para acompanhamento da coordenação.</p></div><button class="btn-secondary" id="exportReport">⬇ Exportar resumo</button></div>
+    <div class="report-grid">
+      <div class="report-card"><span>Atendimentos no mês</span><b>184</b><small>+12% vs. mês anterior</small></div>
+      <div class="report-card"><span>Casos ativos</span><b>96</b><small>64% em acompanhamento</small></div>
+      <div class="report-card"><span>Documentos conferidos</span><b>312</b><small>89% dentro do prazo</small></div>
+      <div class="report-card"><span>Mensagens automáticas</span><b>428</b><small>97% entregues</small></div>
+    </div>
+    <div class="card report-bars"><div class="card-head"><h3>Distribuição dos atendimentos por área</h3></div>
+      <div class="bar-item"><span>Família</span><div><i style="width:78%"></i></div><b>42%</b></div>
+      <div class="bar-item"><span>Consumidor</span><div><i style="width:43%"></i></div><b>21%</b></div>
+      <div class="bar-item"><span>Cível</span><div><i style="width:37%"></i></div><b>18%</b></div>
+      <div class="bar-item"><span>Trabalhista</span><div><i style="width:23%"></i></div><b>11%</b></div>
+      <div class="bar-item"><span>Outros</span><div><i style="width:16%"></i></div><b>8%</b></div>
+    </div>
+  </div>
+
+  <!-- ADMINISTRAÇÃO -->
+  <div class="view hidden" id="view-admin">
+    <div class="pagebar">
+      <div><h2>Administração</h2><p>Crie quantos usuários forem necessários, defina funções e controle o que cada pessoa pode acessar.</p></div>
+      <button class="btn-primary" data-action="novo-usuario">+ Criar usuário</button>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div><p>USUÁRIOS ATIVOS</p><h3 id="adminActive">0</h3><small>Acesso liberado</small></div><div class="micon green">👤</div></div>
+      <div class="metric"><div><p>ADMINISTRADORES</p><h3 id="adminAdmins">0</h3><small>Acesso total</small></div><div class="micon red">👑</div></div>
+      <div class="metric"><div><p>PROFESSORES</p><h3 id="adminProfessors">0</h3><small>Supervisão</small></div><div class="micon blue">🎓</div></div>
+      <div class="metric"><div><p>ALUNOS</p><h3 id="adminStudents">0</h3><small>Acesso acadêmico</small></div><div class="micon yellow">📚</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h3>👥 Usuários cadastrados</h3>
+        <div style="display:flex;gap:8px;align-items:center"><input id="adminSearch" class="small-search" placeholder="Buscar nome ou usuário..."><select id="adminRoleFilter" class="small-select"><option value="">Todas as funções</option><option>Administrador</option><option>Professor</option><option>Aluno</option><option>Secretaria</option></select></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Usuário</th><th>Função</th><th>Status</th><th>Permissões</th><th>Ações</th></tr></thead><tbody id="usersTable"></tbody></table></div>
+    </div>
+    <div class="admin-grid" style="margin-top:20px">
+      <div class="card"><div class="card-head"><h3>🔐 Permissões por função</h3><button class="row-btn" id="adminPermissionGuide">Ver regras</button></div><div class="admin-perm-info">
+        <div><b>Administrador</b><span>Todos os módulos + usuários</span></div>
+        <div><b>Professor</b><span>Triagem, assistidos, documentos, processos, prazos, mensagens e relatórios</span></div>
+        <div><b>Aluno</b><span>Triagem, assistidos, documentos, processos, prazos e mensagens</span></div>
+        <div><b>Secretaria</b><span>Atendimentos, documentos e mensagens</span></div>
+      </div></div>
+      <div class="card"><div class="card-head"><h3>🛡️ Últimas ações</h3></div><div id="auditLog" class="activity-mini"></div></div>
+    </div>
+    <div class="admin-quick-actions">
+      <button data-admin-action="audit">📋 Abrir auditoria completa</button>
+      <button data-admin-action="backup">💾 Exportar usuários (JSON)</button>
+      <button data-admin-action="reset">↺ Restaurar usuários de demonstração</button>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="view hidden" id="view-admin-activity">
+  <div class="pagebar"><div><h2>Auditoria administrativa</h2><p>Veja quem criou, alterou ou desativou usuários.</p></div><button class="btn-secondary" data-nav="admin">← Voltar</button></div>
+  <div class="card"><div class="card-head"><h3>Histórico de ações</h3><button class="row-btn" id="clearAdminAudit">Limpar demonstração</button></div><div id="adminAuditFull" class="activity-mini"></div></div>
+</div>
+
+<div class="view hidden" id="view-config">
+    <div class="pagebar"><div><h2>Configurações</h2><p>Ajustes do sistema e modelos de comunicação.</p></div><button class="btn-primary" id="saveConfig">Salvar configurações</button></div>
+    <div class="settings-grid">
+      <div class="card settings-card"><h3>Identidade do NPJ</h3><label>Nome do sistema<input value="NPJ Fácil — UNISEP"></label><label>Telefone de atendimento<input value="(46) 0000-0000"></label><label>Mensagem de boas-vindas<textarea>Você não precisa entender de Direito para buscar atendimento.</textarea></label></div>
+      <div class="card settings-card"><h3>Notificações automáticas</h3><label class="switch-row"><span>Documento pendente</span><input type="checkbox" checked><span class="fake-switch"></span></label><label class="switch-row"><span>Nova movimentação processual</span><input type="checkbox" checked><span class="fake-switch"></span></label><label class="switch-row"><span>Lembrete de prazo</span><input type="checkbox" checked><span class="fake-switch"></span></label><label class="switch-row"><span>Processo encerrado</span><input type="checkbox"><span class="fake-switch"></span></label></div>
+    </div>
+  </div>
+
+</section>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="modalTitle">Novo atendimento</h3><button class="close" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>NOME DO ASSISTIDO</label><input placeholder="Digite o nome completo"></div>
+      <div class="field"><label>ÁREA DO DIREITO</label><select><option>Direito de Família</option><option>Direito Civil</option><option>Direito do Consumidor</option><option>Direito Trabalhista</option><option>Outra área</option></select></div>
+      <div class="field"><label>RESUMO DO PROBLEMA</label><textarea placeholder="Descreva, em linguagem simples, o que aconteceu..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn-secondary" onclick="closeModal()">Cancelar</button><button class="btn-primary" onclick="saveModal()">Salvar</button></div>
+  </div>
+</div>
+
+
+<script>
+const state = {
+  currentPage: 'dashboard',
+  currentUser: null,
+  users: JSON.parse(localStorage.getItem('npjUsers')||'null') || [
+    {name:'Administrador Principal',user:'admin',email:'admin@unisep.edu.br',role:'Administrador',status:'Ativo',password:'1234',permissions:['*']},
+    {name:'Professor Supervisor',user:'professor',email:'professor@unisep.edu.br',role:'Professor',status:'Ativo',password:'1234',permissions:['triagem','atendimentos','documentos','processos','prazos','mensagens','relatorios']},
+    {name:'Acadêmico de Direito',user:'aluno',email:'aluno@unisep.edu.br',role:'Aluno',status:'Ativo',password:'1234',permissions:['triagem','atendimentos','documentos','processos','prazos','mensagens']}
+  ],
+  audit: JSON.parse(localStorage.getItem('npjAudit')||'null') || [
+    'Administrador Principal criou o usuário Professor Supervisor.',
+    'Professor Supervisor atualizou a triagem de João da Silva.',
+    'Acadêmico de Direito adicionou um documento ao processo de Ana Pereira.'
+  ],
+  triagem: [
+    {name:'João da Silva', area:'Família', summary:'Relata falta de pagamento de pensão alimentícia.', time:'10 min', priority:'urgente'},
+    {name:'Maria Oliveira', area:'Consumidor', summary:'Compra com defeito e pedido de troca não resolvido.', time:'35 min', priority:'normal'},
+    {name:'Carlos Souza', area:'Cível', summary:'Dúvida sobre cobrança e contrato.', time:'1h', priority:'normal'},
+    {name:'Ana Pereira', area:'Família', summary:'Precisa de orientação sobre guarda e convivência.', time:'2h', priority:'normal'},
+  ],
+  assistidos: [
+    {name:'João da Silva', area:'Família', resp:'Acad. Pedro', status:'Em andamento'},
+    {name:'Maria Oliveira', area:'Consumidor', resp:'Acad. Ana', status:'Em andamento'},
+    {name:'Carlos Souza', area:'Cível', resp:'Acad. Lucas', status:'Aguardando'},
+    {name:'Ana Pereira', area:'Família', resp:'Acad. João', status:'Em análise'},
+    {name:'Paulo Mendes', area:'Trabalhista', resp:'Acad. Maria', status:'Em andamento'}
+  ],
+  docs: [
+    {name:'Comprovante de renda', person:'João da Silva', status:'Em análise', action:'Conferir'},
+    {name:'Documento de identificação', person:'Maria Oliveira', status:'Recusado', action:'Solicitar novo'},
+    {name:'Certidão de nascimento', person:'Ana Pereira', status:'Pendente', action:'Enviar lembrete'},
+    {name:'Comprovante de residência', person:'Paulo Mendes', status:'Conferido', action:'Visualizar'}
+  ],
+  processes: [
+    {id:'0001234-56.2026',person:'João da Silva',area:'Família',stage:'Análise jurídica',next:'Elaborar manifestação'},
+    {id:'0009876-11.2026',person:'Maria Oliveira',area:'Consumidor',stage:'Processo protocolado',next:'Aguardar decisão'},
+    {id:'0012456-22.2026',person:'Carlos Souza',area:'Cível',stage:'Aguardando documento',next:'Solicitar comprovante'},
+    {id:'0033456-10.2026',person:'Ana Pereira',area:'Família',stage:'Audiência',next:'Preparar assistido'}
+  ],
+  messages: {
+    'João da Silva': [
+      {type:'out', text:'Olá, João! Seu processo teve uma nova movimentação.', time:'09:30'},
+      {type:'in', text:'O que aconteceu?', time:'10:12'},
+      {type:'out', text:'O juiz solicitou uma nova informação. Nossa equipe está verificando os próximos passos.', time:'10:13'}
+    ],
+    'Maria Oliveira': [
+      {type:'out', text:'Olá, Maria! Precisamos substituir um documento que ficou ilegível.', time:'08:44'}
+    ],
+    'Carlos Souza': [
+      {type:'in', text:'Bom dia, gostaria de saber como está meu atendimento.', time:'08:20'}
+    ]
+  },
+  deadlines: [
+    {person:'João da Silva', task:'Manifestação no processo', date:'09/09/2026', level:'critical'},
+    {person:'Maria Oliveira', task:'Conferir documento substituído', date:'10/09/2026', level:'warning'},
+    {person:'Carlos Souza', task:'Solicitar comprovante', date:'11/09/2026', level:'warning'},
+    {person:'Ana Pereira', task:'Preparar audiência', date:'15/09/2026', level:'good'}
+  ]
+};
+
+const titles = {
+  dashboard:['Painel do NPJ','Visão geral dos atendimentos e pendências'],
+  triagem:['Triagem','Organize e acompanhe os novos atendimentos'],
+  atendimentos:['Atendimentos','Histórico e acompanhamento dos assistidos'],
+  documentos:['Documentos','Controle de documentos recebidos e pendentes'],
+  processos:['Processos','Acompanhamento dos processos jurídicos'],
+  mensagens:['Mensagens','Comunicação com os assistidos'],
+  prazos:['Prazos','Controle de prazos e tarefas urgentes'],
+  relatorios:['Relatórios','Indicadores e dados do Núcleo'],
+  config:['Configurações','Preferências e parâmetros do sistema'],
+  admin:['Administração','Usuários, funções e permissões de acesso'],
+  'admin-activity':['Auditoria administrativa','Histórico das ações de administração']
+};
+
+function toast(text){
+  const el=document.createElement('div'); el.className='toast'; el.textContent=text;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2500);
+}
+
+function nav(page){
+  if(page==='admin' && state.currentUser?.role!=='Administrador'){ toast('Acesso restrito ao administrador.'); return; }
+  state.currentPage=page;
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+  document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));
+  const v=document.getElementById('view-'+page); if(v) v.classList.remove('hidden');
+  document.getElementById('pageTitle').textContent=titles[page][0];
+  document.getElementById('pageSubtitle').textContent=titles[page][1];
+  renderAll();
+  if(window.innerWidth<=760) document.getElementById('sidebar').classList.remove('open');
+}
+
+
+function persistAdmin(){localStorage.setItem('npjUsers',JSON.stringify(state.users));localStorage.setItem('npjAudit',JSON.stringify(state.audit));}
+function renderUsers(){
+  const tbody=document.getElementById('usersTable'); if(!tbody)return;
+  const term=(document.getElementById('adminSearch')?.value||'').toLowerCase(); const role=(document.getElementById('adminRoleFilter')?.value||'');
+  const rows=state.users.filter(u=>(!term||`${u.name} ${u.user} ${u.email||''}`.toLowerCase().includes(term))&&(!role||u.role===role));
+  tbody.innerHTML=rows.map((u)=>{const i=state.users.indexOf(u); return `<tr><td><strong>${u.name}</strong><span style="display:block;font-size:10px;color:var(--muted)">@${u.user}<br>${u.email||''}</span></td><td><span class="role-badge ${u.role==='Administrador'?'admin':''}">${u.role}</span></td><td><span class="status ${u.status==='Ativo'?'':'yellow'}">${u.status}</span></td><td>${u.permissions?.includes('*')?'Todas':(u.permissions?.length||0)+' módulos'}</td><td><div class="user-row-actions"><button class="row-btn" onclick="editUser(${i})">Editar</button><button class="row-btn" onclick="toggleUser(${i})">${u.status==='Ativo'?'Desativar':'Ativar'}</button></div></td></tr>`}).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">Nenhum usuário encontrado.</td></tr>';
+  document.getElementById('adminActive').textContent=state.users.filter(x=>x.status==='Ativo').length;
+  document.getElementById('adminAdmins').textContent=state.users.filter(x=>x.role==='Administrador').length;
+  document.getElementById('adminProfessors').textContent=state.users.filter(x=>x.role==='Professor').length;
+  document.getElementById('adminStudents').textContent=state.users.filter(x=>x.role==='Aluno').length;
+  const audit=document.getElementById('auditLog'); if(audit)audit.innerHTML=state.audit.slice(0,6).map(x=>`<div class="activity-item"><div class="act-icon">🔐</div><div><b>Ação administrativa</b><span>${x}</span></div></div>`).join('');
+}
+function toggleUser(i){ if(state.users[i].user==='admin') return toast('O administrador principal não pode ser desativado.'); state.users[i].status=state.users[i].status==='Ativo'?'Inativo':'Ativo'; state.audit.unshift(`${state.currentUser.name} alterou o status de ${state.users[i].name}.`); persistAdmin(); renderUsers(); toast('Status atualizado.'); }
+function editUser(i){ const u=state.users[i]; openModal('Editar usuário','user'); document.getElementById('modalName').value=u.name; document.getElementById('modalUser').value=u.user; document.getElementById('modalEmail').value=u.email; document.getElementById('modalRole').value=u.role; document.getElementById('modal').dataset.editIndex=i; document.getElementById('modal').dataset.editing='1'; }
+
+function renderAll(){
+  renderDashboard(); renderTriagem(); renderAtendimentos(); renderDocs(); renderProcesses(); renderMessages(); renderDeadlines(); renderUsers(); renderAdminAuditFull();
+}
+
+function renderDashboard(){
+  document.getElementById('attentionList').innerHTML = state.deadlines.slice(0,5).map((x,i)=>`
+    <div class="alert-row">
+      <span class="dot ${x.level==='critical'?'red':x.level==='warning'?'yellow':'green'}"></span>
+      <div class="row-main"><strong>${x.person}</strong><span>${x.task} · ${x.date}</span></div>
+      <span class="tag ${x.level==='critical'?'red':x.level==='warning'?'yellow':'green'}">${x.level==='critical'?'URGENTE':x.level==='warning'?'ATENÇÃO':'CONCLUÍDO'}</span>
+    </div>`).join('');
+
+  document.getElementById('dashboardProcessTable').innerHTML = state.processes.map(p=>`
+    <tr><td><strong>${p.person}</strong></td><td>${p.area}</td><td>08/09/2026</td><td><span class="status ${p.stage.includes('Aguardando')?'yellow':'blue'}">${p.stage}</span></td></tr>`).join('');
+
+  document.getElementById('recentTimeline').innerHTML = [
+    ['Documento recebido','João enviou comprovante de renda · 10 min'],
+    ['Triagem concluída','Maria Oliveira · 35 min'],
+    ['Mensagem enviada','Ana foi avisada sobre o andamento · 1h'],
+    ['Nova movimentação','Processo de Carlos Souza · 2h']
+  ].map(e=>`<div class="event"><span class="event-dot"></span><div><strong>${e[0]}</strong><p>${e[1]}</p></div></div>`).join('');
+}
+
+function renderTriagem(filter='todos'){
+  let data=[...state.triagem];
+  if(filter==='urgente') data=data.filter(x=>x.priority==='urgente');
+  document.getElementById('triagemList').innerHTML=data.map((x,i)=>`
+    <div class="list-row">
+      <div class="list-icon">👤</div>
+      <div class="list-main"><strong>${x.name} ${x.priority==='urgente'?'<span class="tag red" style="display:inline-block;margin-left:6px">URGENTE</span>':''}</strong><span>${x.area} · ${x.time} · ${x.summary}</span></div>
+      <div class="row-actions"><button class="row-btn" onclick="openTriage(${i})">Abrir triagem</button></div>
+    </div>`).join('') || '<div class="empty" style="display:block">Nenhuma triagem encontrada.</div>';
+  document.getElementById('triagemCount').textContent=state.triagem.length+4;
+}
+
+function renderAtendimentos(){
+  const term=(document.getElementById('assistidoSearch')?.value||'').toLowerCase();
+  const area=document.getElementById('areaFilter')?.value||'';
+  const rows=state.assistidos.filter(x=>(!term || `${x.name} ${x.area} ${x.resp}`.toLowerCase().includes(term))&&(!area||x.area===area));
+  document.getElementById('atendimentosTable').innerHTML=rows.map((x,i)=>`
+    <tr><td><strong>${x.name}</strong></td><td>${x.area}</td><td>${x.resp}</td><td><span class="status ${x.status==='Aguardando'?'yellow':x.status==='Em análise'?'blue':''}">${x.status}</span></td><td><button class="row-btn" onclick="openAssistido(${i})">Abrir</button></td></tr>`).join('');
+}
+
+function renderDocs(){
+  document.getElementById('documentList').innerHTML=state.docs.map((x,i)=>{
+    const cls=x.status==='Recusado'?'red':x.status==='Pendente'?'yellow':'green';
+    return `<div class="list-row"><div class="list-icon">📄</div><div class="list-main"><strong>${x.name}</strong><span>${x.person} · <span class="tag ${cls}" style="display:inline-block">${x.status}</span></span></div><div class="row-actions"><button class="row-btn" onclick="docAction(${i})">${x.action}</button></div></div>`;
+  }).join('');
+}
+
+function renderProcesses(){
+  const term=(document.getElementById('processSearch')?.value||'').toLowerCase();
+  const rows=state.processes.filter(x=>`${x.id} ${x.person} ${x.area}`.toLowerCase().includes(term));
+  document.getElementById('processosTable').innerHTML=rows.map((x,i)=>`
+    <tr><td><strong>${x.id}</strong></td><td>${x.person}</td><td>${x.area}</td><td><span class="status blue">${x.stage}</span></td><td>${x.next}</td><td><button class="row-btn" onclick="openProcess(${i})">Ver caso</button></td></tr>`).join('');
+}
+
+function renderMessages(person='João da Silva'){
+  const people=Object.keys(state.messages);
+  document.getElementById('conversationList').innerHTML=people.map(p=>`
+    <div class="conversation ${p===person?'active':''}" onclick="renderMessages('${p.replace(/'/g,"\\'")}')">
+      <div class="avatar">${p.split(' ').map(s=>s[0]).slice(0,2).join('')}</div>
+      <div><strong>${p}</strong><p>${state.messages[p].at(-1)?.text||''}</p></div>
+    </div>`).join('');
+  document.getElementById('conversationTitle').textContent=person;
+  document.getElementById('chatBox').innerHTML=(state.messages[person]||[]).map(m=>`<div class="bubble ${m.type}">${m.text}<small>${m.time}</small></div>`).join('');
+}
+
+function renderDeadlines(){
+  document.getElementById('deadlineList').innerHTML=state.deadlines.map((x,i)=>{
+    const cls=x.level==='critical'?'red':x.level==='warning'?'yellow':'green';
+    return `<div class="list-row"><div class="list-icon">${x.level==='critical'?'🚨':x.level==='warning'?'⏰':'✅'}</div><div class="list-main"><strong>${x.person}</strong><span>${x.task} · ${x.date}</span></div><span class="tag ${cls}">${x.level==='critical'?'URGENTE':x.level==='warning'?'PRÓXIMO':'OK'}</span><button class="row-btn" onclick="completeDeadline(${i})">Concluir</button></div>`;
+  }).join('');
+}
+
+function openModal(title, type='general'){
+  document.getElementById('modalTitle').textContent=title;
+  const body=document.querySelector('.modal-body');
+  let content='';
+  if(type==='message') content=`<div class="field"><label>ASSISTIDO</label><select id="modalPerson">${Object.keys(state.messages).map(p=>`<option>${p}</option>`).join('')}</select></div><div class="field"><label>MENSAGEM</label><textarea id="modalText" placeholder="Escreva em linguagem simples..."></textarea></div>`;
+  else if(type==='document') content=`<div class="field"><label>ASSISTIDO</label><input id="modalPerson" placeholder="Nome do assistido"></div><div class="field"><label>DOCUMENTO</label><input id="modalDoc" placeholder="Ex.: Comprovante de residência"></div>`;
+  else if(type==='deadline') content=`<div class="field"><label>ASSISTIDO</label><input id="modalPerson" placeholder="Nome do assistido"></div><div class="field"><label>TAREFA / PRAZO</label><input id="modalTask" placeholder="Ex.: Manifestação"></div><div class="field"><label>DATA</label><input id="modalDate" type="date"></div>`;
+  else if(type==='user') content=`<div class="field"><label>NOME COMPLETO</label><input id="modalName" placeholder="Nome do usuário"></div><div class="field"><label>USUÁRIO</label><input id="modalUser" placeholder="ex.: maria.souza"></div><div class="field"><label>E-MAIL</label><input id="modalEmail" type="email" placeholder="email@exemplo.com"></div><div class="field"><label>FUNÇÃO</label><select id="modalRole"><option>Aluno</option><option>Professor</option><option>Administrador</option><option>Secretaria</option></select></div><div class="field"><label>SENHA PROVISÓRIA</label><input id="modalPassword" value="1234"></div><div class="field"><label>PERMISSÕES</label><div class="perm-grid"><label class="perm-check"><input type="checkbox" checked value="triagem"> Triagem</label><label class="perm-check"><input type="checkbox" checked value="atendimentos"> Assistidos</label><label class="perm-check"><input type="checkbox" checked value="documentos"> Documentos</label><label class="perm-check"><input type="checkbox" checked value="processos"> Processos</label><label class="perm-check"><input type="checkbox" checked value="prazos"> Prazos</label><label class="perm-check"><input type="checkbox" checked value="mensagens"> Mensagens</label><label class="perm-check"><input type="checkbox" value="relatorios"> Relatórios</label><label class="perm-check"><input type="checkbox" value="admin"> Administração</label></div><small style="color:var(--muted);font-size:10px;display:block;margin-top:5px">Você pode cadastrar quantos usuários precisar. Não há limite de quantidade nesta versão.</small></div>`;
+  else if(type==='process') content=`<div class="field"><label>ASSISTIDO</label><input id="modalPerson" placeholder="Nome do assistido"></div><div class="field"><label>NÚMERO DO PROCESSO</label><input id="modalProc" placeholder="0000000-00.2026"></div><div class="field"><label>ETAPA ATUAL</label><select id="modalStage"><option>Triagem</option><option>Documentação</option><option>Análise jurídica</option><option>Processo protocolado</option><option>Aguardando decisão</option><option>Audiência</option></select></div>`;
+  else if(type==='triage') content=`<div class="field"><label>NOME DO ASSISTIDO</label><input id="modalPerson" placeholder="Digite o nome completo"></div><div class="field"><label>O QUE ACONTECEU?</label><textarea id="modalProblem" placeholder="Conte com suas próprias palavras..."></textarea></div><div class="field"><label>ÁREA SUGERIDA</label><select id="modalArea"><option>Família</option><option>Consumidor</option><option>Cível</option><option>Trabalhista</option><option>Não sei informar</option></select></div>`;
+  else content=`<div class="field"><label>NOME DO ASSISTIDO</label><input id="modalPerson" placeholder="Digite o nome completo"></div><div class="field"><label>ÁREA DO DIREITO</label><select id="modalArea"><option>Direito de Família</option><option>Direito Civil</option><option>Direito do Consumidor</option><option>Direito Trabalhista</option><option>Outra área</option></select></div><div class="field"><label>RESUMO DO PROBLEMA</label><textarea id="modalProblem" placeholder="Descreva, em linguagem simples, o que aconteceu..."></textarea></div>`;
+  body.innerHTML=content;
+  document.getElementById('modal').dataset.type=type;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function saveModal(){
+  const type=document.getElementById('modal').dataset.type;
+  const person=document.getElementById('modalPerson')?.value?.trim();
+  if(type==='user'){ const role=document.getElementById('modalRole').value; const u={name:document.getElementById('modalName').value.trim(),user:document.getElementById('modalUser').value.trim().toLowerCase(),email:document.getElementById('modalEmail').value.trim(),role,status:'Ativo',password:document.getElementById('modalPassword').value||'1234',permissions:(role==='Administrador'?['*']:[...document.querySelectorAll('.perm-check input:checked')].map(x=>x.value))}; if(!u.name||!u.user) return toast('Preencha nome e usuário.'); const idx=Number(document.getElementById('modal').dataset.editIndex); if(document.getElementById('modal').dataset.editing==='1' && !Number.isNaN(idx)){ state.users[idx]={...state.users[idx],...u}; state.audit.unshift(`${state.currentUser.name} editou o usuário ${u.name}.`); } else { if(state.users.some(x=>x.user===u.user)) return toast('Esse usuário já existe.'); state.users.push(u); state.audit.unshift(`${state.currentUser.name} criou o usuário ${u.name}.`); } persistAdmin(); closeModal(); nav('admin'); renderUsers(); toast('Usuário salvo com sucesso.'); return; }
+  if(type==='message'){
+    if(!person || !document.getElementById('modalText').value.trim()) return toast('Preencha o assistido e a mensagem.');
+    state.messages[person]=state.messages[person]||[];
+    state.messages[person].push({type:'out',text:document.getElementById('modalText').value.trim(),time:'agora'});
+    closeModal(); nav('mensagens'); renderMessages(person); toast('Mensagem enviada e registrada.');
+  } else if(type==='document'){
+    if(!person) return toast('Informe o assistido.');
+    state.docs.unshift({name:document.getElementById('modalDoc').value.trim()||'Novo documento',person,status:'Em análise',action:'Conferir'});
+    closeModal(); nav('documentos'); toast('Documento adicionado.');
+  } else if(type==='deadline'){
+    if(!person || !document.getElementById('modalTask').value.trim()) return toast('Preencha os campos do prazo.');
+    const dateVal=document.getElementById('modalDate').value;
+    state.deadlines.unshift({person,task:document.getElementById('modalTask').value.trim(),date:dateVal?new Date(dateVal+'T12:00:00').toLocaleDateString('pt-BR'):'A definir',level:'warning'});
+    closeModal(); nav('prazos'); toast('Prazo registrado.');
+  } else if(type==='process'){
+    if(!person || !document.getElementById('modalProc').value.trim()) return toast('Preencha o processo e o assistido.');
+    state.processes.unshift({id:document.getElementById('modalProc').value.trim(),person,area:'Cível',stage:document.getElementById('modalStage').value,next:'Definir próxima providência'});
+    closeModal(); nav('processos'); toast('Processo registrado.');
+  } else if(type==='triage'){
+    if(!person) return toast('Informe o nome do assistido.');
+    state.triagem.unshift({name:person,area:document.getElementById('modalArea').value,summary:document.getElementById('modalProblem').value.trim()||'Sem descrição',time:'agora',priority:'normal'});
+    closeModal(); nav('triagem'); toast('Triagem criada.');
+  } else {
+    if(!person) return toast('Informe o nome do assistido.');
+    state.assistidos.unshift({name:person,area:document.getElementById('modalArea').value.replace('Direito de ','').replace('Outra área','Cível'),resp:'A definir',status:'Novo'});
+    closeModal(); nav('atendimentos'); toast('Novo atendimento cadastrado.');
+  }
+}
+
+function openTriage(i){const x=state.triagem[i];openModal('Triagem — '+x.name,'triage');document.getElementById('modalPerson').value=x.name;document.getElementById('modalProblem').value=x.summary}
+function openAssistido(i){const x=state.assistidos[i];openModal('Atendimento — '+x.name,'general');document.getElementById('modalPerson').value=x.name}
+function docAction(i){const x=state.docs[i]; if(x.status==='Pendente'||x.status==='Recusado'){toast('Mensagem de pendência enviada para '+x.person);x.status='Em análise';x.action='Conferir';renderDocs()}else{toast('Abrindo '+x.name)}}
+function openProcess(i){const x=state.processes[i];toast('Abrindo linha do tempo de '+x.person)}
+function completeDeadline(i){state.deadlines[i].level='good';toast('Prazo marcado como concluído.');renderDeadlines();renderDashboard()}
+
+
+const credentials={admin:{password:'1234',name:'Administrador Principal',role:'Administrador'},professor:{password:'1234',name:'Professor Supervisor',role:'Professor'},aluno:{password:'1234',name:'Acadêmico de Direito',role:'Aluno'}};
+function applyPermissions(){
+  const role=state.currentUser?.role; const admin=role==='Administrador';
+  document.getElementById('adminNav').style.display=admin?'flex':'none';
+  const map={triagem:'triagem',atendimentos:'atendimentos',documentos:'documentos',processos:'processos',mensagens:'mensagens',prazos:'prazos',relatorios:'relatorios',config:'config'};
+  document.querySelectorAll('.nav button[data-page]').forEach(btn=>{
+    if(btn.dataset.page==='admin') return;
+    const key=map[btn.dataset.page]; const perms=state.currentUser?.permissions||[]; btn.style.display=(admin||perms.includes(key))?'flex':'none';
+  });
+  document.getElementById('headerUserName').textContent=state.currentUser.name; document.getElementById('headerUserRole').textContent=state.currentUser.role;
+  document.getElementById('headerAvatar').textContent=state.currentUser.name.split(' ').map(x=>x[0]).slice(0,2).join('');
+}
+function doLogin(){
+  const user=document.getElementById('loginUser').value.trim().toLowerCase(), pass=document.getElementById('loginPass').value;
+  const stored=state.users.find(x=>x.user===user);
+  const c=stored || credentials[user];
+  if(!c||c.password!==pass||(stored&&stored.status!=='Ativo')){document.getElementById('loginError').style.display='block';return;}
+  state.currentUser={...c,user};
+  localStorage.setItem('npjSession',JSON.stringify({user})); document.getElementById('loginError').style.display='none'; document.getElementById('loginScreen').style.display='none'; applyPermissions(); nav('dashboard'); toast('Bem-vindo ao NPJ Fácil.');
+}
+function logout(){localStorage.removeItem('npjSession');state.currentUser=null;document.getElementById('loginScreen').style.display='flex';document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';document.getElementById('userDropdown').classList.remove('open');}
+
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>nav(btn.dataset.page)));
+document.addEventListener('click',e=>{
+  const n=e.target.closest('[data-nav]'); if(n) nav(n.dataset.nav);
+  const a=e.target.closest('[data-action]'); if(a){
+    const map={'novo-atendimento':['Novo atendimento','general'],'nova-triagem':['Nova triagem','triage'],'novo-documento':['Adicionar documento','document'],'nova-mensagem':['Nova mensagem','message'],'novo-prazo':['Registrar prazo','deadline'],'novo-processo':['Registrar processo','process'],'novo-usuario':['Criar usuário','user']};
+    const v=map[a.dataset.action]; if(v) openModal(v[0],v[1]);
+  }
+});
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+document.getElementById('newAttendance')?.addEventListener('click',()=>openModal('Novo atendimento','general'));
+document.querySelector('.close')?.addEventListener('click',closeModal);
+document.getElementById('sendMessage').addEventListener('click',()=>{
+  const input=document.getElementById('messageInput'); const text=input.value.trim(); if(!text) return;
+  const person=document.getElementById('conversationTitle').textContent;
+  state.messages[person].push({type:'out',text,time:'agora'}); input.value=''; renderMessages(person); toast('Mensagem enviada.');
+});
+document.getElementById('messageInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('sendMessage').click()});
+document.getElementById('assistidoSearch').addEventListener('input',renderAtendimentos);
+document.getElementById('areaFilter').addEventListener('change',renderAtendimentos);
+document.getElementById('processSearch').addEventListener('input',renderProcesses);
+document.querySelectorAll('.filter').forEach(f=>f.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));f.classList.add('active');renderTriagem(f.dataset.filter)}));
+document.getElementById('saveConfig').addEventListener('click',()=>toast('Configurações salvas.'));
+document.getElementById('exportReport').addEventListener('click',()=>{
+  const text='NPJ FÁCIL — RELATÓRIO\\nAtendimentos no mês: 184\\nCasos ativos: 96\\nDocumentos conferidos: 312\\nMensagens automáticas: 428';
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='relatorio-npj.txt';a.click();URL.revokeObjectURL(a.href);
+});
+document.getElementById('mobileMenu').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('openNotifications').onclick=()=>{nav('prazos');toast('Você tem 5 itens que precisam de atenção.')};
+
+document.getElementById('adminSearch')?.addEventListener('input',renderUsers);
+document.getElementById('adminRoleFilter')?.addEventListener('change',renderUsers);
+document.getElementById('loginBtn').addEventListener('click',doLogin);
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('logoutBtn').addEventListener('click',logout);
+document.getElementById('userButton').addEventListener('click',()=>document.getElementById('userDropdown').classList.toggle('open'));
+document.getElementById('changePassword').addEventListener('click',()=>toast('Em produção: integração com troca de senha segura.'));
+(function restoreSession(){const raw=localStorage.getItem('npjSession'); if(raw){try{const s=JSON.parse(raw); const c=credentials[s.user]; const u=state.users.find(x=>x.user===s.user); if(c){state.currentUser={...c,user:s.user,...(u||{})};document.getElementById('loginScreen').style.display='none';applyPermissions();}}catch(e){}}})();
+
+
+function renderAdminAuditFull(){
+  const el=document.getElementById('adminAuditFull'); if(!el)return;
+  el.innerHTML=state.audit.map((x,i)=>`<div class="activity-item"><div class="act-icon">🔐</div><div><b>Ação ${i+1}</b><span>${x}</span></div></div>`).join('') || '<div class="empty" style="display:block">Nenhum registro.</div>';
+}
+function resetDemoUsers(){
+  state.users=[
+    {name:'Administrador Principal',user:'admin',email:'admin@unisep.edu.br',role:'Administrador',status:'Ativo',permissions:['*']},
+    {name:'Professor Supervisor',user:'professor',email:'professor@unisep.edu.br',role:'Professor',status:'Ativo',permissions:['triagem','atendimentos','documentos','processos','prazos','mensagens','relatorios']},
+    {name:'Acadêmico de Direito',user:'aluno',email:'aluno@unisep.edu.br',role:'Aluno',status:'Ativo',permissions:['triagem','atendimentos','documentos','processos','prazos','mensagens']}
+  ];
+  state.audit.unshift(`${state.currentUser.name} restaurou os usuários de demonstração.`); persistAdmin(); renderUsers(); renderAdminAuditFull(); toast('Usuários de demonstração restaurados.');
+}
+document.addEventListener('click',e=>{
+  const aa=e.target.closest('[data-admin-action]');
+  if(aa){
+    if(!state.currentUser || state.currentUser.role!=='Administrador') return toast('Acesso restrito ao administrador.');
+    const act=aa.dataset.adminAction;
+    if(act==='audit'){nav('admin-activity');renderAdminAuditFull();}
+    if(act==='backup'){
+      const blob=new Blob([JSON.stringify(state.users,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='usuarios-npj.json';a.click();URL.revokeObjectURL(a.href);toast('Arquivo de usuários exportado.');
+    }
+    if(act==='reset' && confirm('Restaurar os usuários de demonstração? Isso substituirá os usuários criados nesta demonstração.')) resetDemoUsers();
+  }
+});
+document.getElementById('adminPermissionGuide')?.addEventListener('click',()=>toast('Administrador: tudo. Professor: supervisão. Aluno: casos atribuídos. Secretaria: cadastro e documentos.'));
+document.getElementById('clearAdminAudit')?.addEventListener('click',()=>{state.audit=[];persistAdmin();renderAdminAuditFull();toast('Auditoria limpa.');});
+
+renderAll();
+</script>
+
+</body>
+</html>
